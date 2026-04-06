@@ -7,6 +7,7 @@ const { loadEnv, listEnv, setEnv, unsetEnv } = require('../lib/env');
 const { saveRequest, loadCollection, listCollections, exportCollection } = require('../lib/collection');
 const { generateDocs } = require('../lib/docs');
 const { displayResponse } = require('../lib/display');
+const { validateHeader, safeJsonParse } = require('../lib/security');
 const package = require('../package.json');
 
 const program = new Command();
@@ -41,7 +42,16 @@ program
       if (options.header) {
         options.header.forEach(header => {
           const [key, ...values] = header.split(':');
-          headers[key.trim()] = replaceEnvVars(values.join(':').trim());
+          const headerName = key.trim();
+          const headerValue = replaceEnvVars(values.join(':').trim());
+
+          // Validate header to prevent injection attacks
+          try {
+            validateHeader(headerName, headerValue);
+            headers[headerName] = headerValue;
+          } catch (error) {
+            throw new Error(`Invalid header "${header}": ${error.message}`);
+          }
         });
       }
 
@@ -50,12 +60,28 @@ program
       if (options.data) {
         if (options.data.startsWith('@')) {
           const fs = require('fs');
+          const path = require('path');
           const filePath = options.data.substring(1);
-          data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+          // Resolve and validate file path - only allow reading from current directory or subdirectories
+          const resolvedPath = path.resolve(process.cwd(), filePath);
+          const cwd = path.resolve(process.cwd());
+
+          // Security check: ensure file is within current working directory
+          if (!resolvedPath.startsWith(cwd + path.sep) && resolvedPath !== cwd) {
+            throw new Error('Access denied: cannot read files outside current directory');
+          }
+
+          if (!fs.existsSync(resolvedPath)) {
+            throw new Error(`File not found: ${filePath}`);
+          }
+
+          const fileContent = fs.readFileSync(resolvedPath, 'utf8');
+          data = safeJsonParse(fileContent);
         } else {
           data = replaceEnvVars(options.data);
           try {
-            data = JSON.parse(data);
+            data = safeJsonParse(data);
           } catch (e) {
             // Keep as string if not valid JSON
           }
