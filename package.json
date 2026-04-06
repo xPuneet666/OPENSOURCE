@@ -6,9 +6,13 @@
   "bin": {
     "devapi": "./bin/devapi.js"
   },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "start": "node bin/devapi.js",
-    "test": "node test/test.js"
+    "test": "node test/test.js",
+    "postinstall": "echo '✅ DevAPI CLI installed! Run \"devapi --help\" to get started.'"
   },
   "repository": {
     "type": "git",
