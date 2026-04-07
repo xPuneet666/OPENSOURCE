@@ -3,7 +3,19 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)
 
+> **A secure, zero-config API testing CLI that replaces Postman/Insomnia - no account, no bloat, complete offline functionality for privacy-focused developers.**
+
 A modern, powerful CLI tool for API testing, documentation, and environment management. Think of it as a free, lightweight, and terminal-friendly alternative to Postman.
+
+## 🎯 Why DevAPI?
+
+Developers need a fast, secure way to test APIs without:
+- Creating accounts or logging in
+- Installing heavy Electron apps (500MB+)
+- Sharing data with cloud services
+- Switching between terminal and GUI
+
+**Alternatives:** Postman (GUI, account required), Insomnia (heavy), curl (no collections), httpie (limited features)
 
 ## 🚀 Features
 
